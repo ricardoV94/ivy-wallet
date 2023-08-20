@@ -35,7 +35,10 @@ import com.ivy.wallet.ui.theme.components.ReorderButton
 import com.ivy.wallet.ui.theme.components.ReorderModalSingleType
 import com.ivy.wallet.ui.theme.modal.BudgetModal
 import com.ivy.wallet.ui.theme.modal.BudgetModalData
+import com.ivy.wallet.ui.theme.modal.ChoosePeriodModal
+import com.ivy.wallet.ui.theme.modal.ChoosePeriodModalData
 import com.ivy.wallet.ui.theme.wallet.AmountCurrencyB1
+import com.ivy.wallet.ui.theme.wallet.PeriodSelector
 import com.ivy.wallet.utils.clickableNoIndication
 import com.ivy.wallet.utils.format
 import com.ivy.wallet.utils.onScreenStart
@@ -44,6 +47,7 @@ import com.ivy.wallet.utils.onScreenStart
 fun BoxWithConstraintsScope.BudgetScreen(screen: BudgetScreen) {
     val viewModel: BudgetViewModel = viewModel()
 
+    val period by viewModel.period.collectAsState()
     val timeRange by viewModel.timeRange.collectAsState()
     val baseCurrency by viewModel.baseCurrencyCode.collectAsState()
     val categories by viewModel.categories.collectAsState()
@@ -57,6 +61,7 @@ fun BoxWithConstraintsScope.BudgetScreen(screen: BudgetScreen) {
     }
 
     UI(
+        period = period,
         timeRange = timeRange,
         baseCurrency = baseCurrency,
         categories = categories,
@@ -68,12 +73,16 @@ fun BoxWithConstraintsScope.BudgetScreen(screen: BudgetScreen) {
         onCreateBudget = viewModel::createBudget,
         onEditBudget = viewModel::editBudget,
         onDeleteBudget = viewModel::deleteBudget,
-        onReorder = viewModel::reorder
+        onReorder = viewModel::reorder,
+        onSetPeriod = viewModel::setPeriod,
+        onPreviousPeriod = viewModel::previousPeriod,
+        onNextPeriod = viewModel::nextPeriod
     )
 }
 
 @Composable
 private fun BoxWithConstraintsScope.UI(
+    period: TimePeriod,
     timeRange: FromToTimeRange?,
     baseCurrency: String,
     categories: List<Category>,
@@ -85,10 +94,16 @@ private fun BoxWithConstraintsScope.UI(
     onCreateBudget: (CreateBudgetData) -> Unit = {},
     onEditBudget: (Budget) -> Unit = {},
     onDeleteBudget: (Budget) -> Unit = {},
-    onReorder: (List<DisplayBudget>) -> Unit = {}
+    onReorder: (List<DisplayBudget>) -> Unit = {},
+    onSetPeriod: (TimePeriod) -> Unit = {},
+    onPreviousPeriod: () -> Unit = {},
+    onNextPeriod: () -> Unit = {}
+    
 ) {
+    var choosePeriodModal: ChoosePeriodModalData? by remember { mutableStateOf(null) }
     var reorderModalVisible by remember { mutableStateOf(false) }
     var budgetModalData: BudgetModalData? by remember { mutableStateOf(null) }
+
 
     Column(
         modifier = Modifier
@@ -105,6 +120,19 @@ private fun BoxWithConstraintsScope.UI(
             categoryBudgetsTotal = categoryBudgetsTotal,
             setReorderModalVisible = {
                 reorderModalVisible = it
+            }
+        )
+
+        Spacer(Modifier.height(8.dp))
+
+        PeriodSelector(
+            period = period,
+            onPreviousPeriod = onPreviousPeriod,
+            onNextPeriod = onNextPeriod,
+            onShowChoosePeriodModal = {
+                choosePeriodModal = ChoosePeriodModalData(
+                    period = period
+                )
             }
         )
 
@@ -140,6 +168,7 @@ private fun BoxWithConstraintsScope.UI(
 
         Spacer(Modifier.height(150.dp))  //scroll hack
     }
+
 
     val nav = navigation()
     BudgetBottomBar(
@@ -186,6 +215,13 @@ private fun BoxWithConstraintsScope.UI(
             budgetModalData = null
         }
     )
+
+    ChoosePeriodModal(
+        modal = choosePeriodModal,
+        dismiss = { choosePeriodModal = null }
+    ) {
+        onSetPeriod(it)
+    }
 }
 
 @Composable
@@ -214,54 +250,54 @@ private fun Toolbar(
                 )
             )
 
-            if (timeRange != null) {
-                Spacer(Modifier.height(4.dp))
+//            if (timeRange != null) {
+//                Spacer(Modifier.height(4.dp))
+//
+//                Text(
+//                    text = timeRange.toDisplay(),
+//                    style = UI.typo.b2.style(
+//                        color = UI.colors.pureInverse,
+//                        fontWeight = FontWeight.Medium
+//                    )
+//                )
+//            }
 
-                Text(
-                    text = timeRange.toDisplay(),
-                    style = UI.typo.b2.style(
-                        color = UI.colors.pureInverse,
-                        fontWeight = FontWeight.Medium
-                    )
-                )
-            }
-
-            if (categoryBudgetsTotal > 0 || appBudgetMax > 0) {
-                Spacer(Modifier.height(4.dp))
-
-                val categoryBudgetText = if (categoryBudgetsTotal > 0) {
-                    stringResource(
-                        R.string.for_categories,
-                        categoryBudgetsTotal.format(baseCurrency),
-                        baseCurrency
-                    )
-                } else ""
-
-                val appBudgetMaxText = if (appBudgetMax > 0) {
-                    stringResource(
-                        R.string.app_budget,
-                        appBudgetMax.format(baseCurrency),
-                        baseCurrency
-                    )
-                } else ""
-
-                val hasBothBudgetTypes =
-                    categoryBudgetText.isNotBlank() && appBudgetMaxText.isNotBlank()
-                Text(
-                    modifier = Modifier.testTag("budgets_info_text"),
-                    text = if (hasBothBudgetTypes)
-                        stringResource(
-                            R.string.budget_info_both,
-                            categoryBudgetText,
-                            appBudgetMaxText
-                        )
-                    else stringResource(R.string.budget_info, categoryBudgetText, appBudgetMaxText),
-                    style = UI.typo.nC.style(
-                        color = Gray,
-                        fontWeight = FontWeight.ExtraBold
-                    )
-                )
-            }
+//            if (categoryBudgetsTotal > 0 || appBudgetMax > 0) {
+//                Spacer(Modifier.height(4.dp))
+//
+//                val categoryBudgetText = if (categoryBudgetsTotal > 0) {
+//                    stringResource(
+//                        R.string.for_categories,
+//                        categoryBudgetsTotal.format(baseCurrency),
+//                        baseCurrency
+//                    )
+//                } else ""
+//
+//                val appBudgetMaxText = if (appBudgetMax > 0) {
+//                    stringResource(
+//                        R.string.app_budget,
+//                        appBudgetMax.format(baseCurrency),
+//                        baseCurrency
+//                    )
+//                } else ""
+//
+//                val hasBothBudgetTypes =
+//                    categoryBudgetText.isNotBlank() && appBudgetMaxText.isNotBlank()
+//                Text(
+//                    modifier = Modifier.testTag("budgets_info_text"),
+//                    text = if (hasBothBudgetTypes)
+//                        stringResource(
+//                            R.string.budget_info_both,
+//                            categoryBudgetText,
+//                            appBudgetMaxText
+//                        )
+//                    else stringResource(R.string.budget_info, categoryBudgetText, appBudgetMaxText),
+//                    style = UI.typo.nC.style(
+//                        color = Gray,
+//                        fontWeight = FontWeight.ExtraBold
+//                    )
+//                )
+//            }
 
         }
 
@@ -383,9 +419,8 @@ private fun NoBudgetsEmptyState(
 private fun Preview_Empty() {
     IvyWalletPreview {
         UI(
-            timeRange = TimePeriod.currentMonth(
-                startDayOfMonth = 1
-            ).toRange(1), //preview
+            period = TimePeriod(year=2022),
+            timeRange = TimePeriod(year=2022).toRange(1), //preview
             baseCurrency = "BGN",
             categories = emptyList(),
             accounts = emptyList(),
@@ -403,6 +438,7 @@ private fun Preview_Empty() {
 private fun Preview_Budgets() {
     IvyWalletPreview {
         UI(
+            period = TimePeriod.currentMonth(startDayOfMonth = 1),
             timeRange = TimePeriod.currentMonth(
                 startDayOfMonth = 1
             ).toRange(1), //preview

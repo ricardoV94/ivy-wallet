@@ -29,6 +29,7 @@ import com.ivy.wallet.ui.IvyWalletCtx
 import com.ivy.wallet.ui.budget.model.DisplayBudget
 import com.ivy.wallet.ui.onboarding.model.TimePeriod
 import com.ivy.wallet.ui.onboarding.model.toCloseTimeRange
+import com.ivy.wallet.utils.dateNowUTC
 import com.ivy.wallet.utils.getDefaultFIATCurrency
 import com.ivy.wallet.utils.ioThread
 import com.ivy.wallet.utils.isNotNullOrBlank
@@ -59,6 +60,9 @@ class BudgetViewModel @Inject constructor(
     private val _timeRange = MutableStateFlow(ivyContext.selectedPeriod.toRange(1))
     val timeRange = _timeRange.readOnly()
 
+    private val _period = MutableStateFlow(ivyContext.selectedPeriod)
+    val period = _period.readOnly()
+
     private val _baseCurrencyCode = MutableStateFlow(getDefaultFIATCurrency().currencyCode)
     val baseCurrencyCode = _baseCurrencyCode.readOnly()
 
@@ -77,7 +81,7 @@ class BudgetViewModel @Inject constructor(
     private val _appBudgetMax = MutableStateFlow(0.0)
     val appBudgetMax = _appBudgetMax.readOnly()
 
-    fun start() {
+    fun start(period: TimePeriod = ivyContext.selectedPeriod) {
         viewModelScope.launch {
             TestIdlingResource.increment()
 
@@ -89,11 +93,8 @@ class BudgetViewModel @Inject constructor(
             val baseCurrency = baseCurrencyAct(Unit)
             _baseCurrencyCode.value = baseCurrency
 
-            val startDateOfMonth = ivyContext.initStartDayOfMonthInMemory(sharedPrefs = sharedPrefs)
-            val timeRange = TimePeriod.currentMonth(
-                startDayOfMonth = startDateOfMonth
-            ).toRange(startDateOfMonth = startDateOfMonth)
-            _timeRange.value = timeRange
+            _period.value = period
+            _timeRange.value = period.toRange(ivyContext.startDayOfMonth)
 
             val budgets = budgetsAct(Unit)
 
@@ -111,15 +112,45 @@ class BudgetViewModel @Inject constructor(
                         budget = it,
                         spentAmount = calculateSpentAmount(
                             budget = it,
-                            transactions = historyTrnsAct(timeRange.toCloseTimeRange()),
+                            transactions = historyTrnsAct(_timeRange.value.toCloseTimeRange()),
                             accounts = accounts,
                             baseCurrencyCode = baseCurrency
                         )
                     )
                 }
-            }!!
+            }
 
             TestIdlingResource.decrement()
+        }
+    }
+
+    fun setPeriod(period: TimePeriod) {
+        start(period = period)
+    }
+
+    fun previousPeriod() {
+        val month = period.value.month
+        val year = period.value.year
+        if (month != null) {
+            start(
+                period = month.incrementMonthPeriod(ivyContext, -1L, year ?: dateNowUTC().year),
+            )
+        }
+        else if (year != null) {
+            start( period = TimePeriod(year = year - 1))
+        }
+    }
+
+    fun nextPeriod() {
+        val month = period.value.month
+        val year = period.value.year
+        if (month != null) {
+            start(
+                period = month.incrementMonthPeriod(ivyContext, 1L, year ?: dateNowUTC().year),
+            )
+        }
+        else if (year != null) {
+            start( period = TimePeriod(year = year + 1))
         }
     }
 
