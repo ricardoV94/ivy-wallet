@@ -58,8 +58,8 @@ fun BoxWithConstraintsScope.BalanceScreen(screen: BalanceScreen) {
         balanceAfterPlannedPayments = balanceAfterPlannedPayments,
 
         onSetPeriod = viewModel::setPeriod,
-        onPreviousMonth = viewModel::previousMonth,
-        onNextMonth = viewModel::nextMonth
+        onPreviousPeriod = viewModel::previousPeriod,
+        onNextPeriod = viewModel::nextPeriod
     )
 }
 
@@ -73,8 +73,8 @@ private fun BoxWithConstraintsScope.UI(
     balanceAfterPlannedPayments: Double,
 
     onSetPeriod: (TimePeriod) -> Unit = {},
-    onPreviousMonth: () -> Unit = {},
-    onNextMonth: () -> Unit = {}
+    onPreviousPeriod: () -> Unit = {},
+    onNextPeriod: () -> Unit = {}
 ) {
     var choosePeriodModal: ChoosePeriodModalData? by remember { mutableStateOf(null) }
 
@@ -88,8 +88,8 @@ private fun BoxWithConstraintsScope.UI(
 
         PeriodSelector(
             period = period,
-            onPreviousMonth = onPreviousMonth,
-            onNextMonth = onNextMonth,
+            onPreviousPeriod = onPreviousPeriod,
+            onNextPeriod = onNextPeriod,
             onShowChoosePeriodModal = {
                 choosePeriodModal = ChoosePeriodModalData(
                     period = period

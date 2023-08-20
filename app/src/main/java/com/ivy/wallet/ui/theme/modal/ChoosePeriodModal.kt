@@ -96,6 +96,14 @@ fun BoxWithConstraintsScope.ChoosePeriodModal(
 
         Spacer(Modifier.height(32.dp))
 
+        ChooseYear(
+                selectedYear = if(period?.month == null) period?.year else null
+        ) {
+            period = TimePeriod(year = it)
+        }
+
+        Spacer(Modifier.height(32.dp))
+
         FromToRange(
             timeRange = period?.fromToRange
         ) {
@@ -205,6 +213,73 @@ private fun ChooseMonth(
         }
     }
 }
+
+@Composable
+private fun ChooseYear(
+        selectedYear: Int?,
+        onSelected: (Int) -> Unit,
+) {
+    Text(
+            modifier = Modifier
+                    .padding(start = 32.dp),
+            text = stringResource(R.string.or_year),
+            style = UI.typo.b1.style(
+                    color = if (selectedYear != null) UI.colors.pureInverse else Gray,
+                    fontWeight = FontWeight.ExtraBold
+            )
+    )
+
+    Spacer(Modifier.height(24.dp))
+
+    val numPrevYears = 100
+    val numNextYears = 10
+    val currentYear = dateNowUTC().year
+    val years = remember(currentYear) {
+        MutableList(numPrevYears + numNextYears + 1) { it + currentYear - numPrevYears}
+    }
+
+    val state = rememberLazyListState()
+
+    val coroutineScope = rememberCoroutineScope()
+    onScreenStart {
+        if (selectedYear != null) {
+            val selectedYearIndex = years.indexOf(selectedYear)
+            if (selectedYearIndex != -1) {
+                coroutineScope.launch {
+                    state.scrollToItem(selectedYearIndex)
+                }
+            }
+        } else {
+            val currentYearIndex = years.indexOf(currentYear)
+            if (currentYearIndex != -1) {
+                coroutineScope.launch {
+                    state.scrollToItem(currentYearIndex)
+                }
+            }
+        }
+    }
+
+    LazyRow(
+            state = state,
+            verticalAlignment = Alignment.CenterVertically
+    ) {
+        item {
+            Spacer(Modifier.width(12.dp))
+        }
+
+        items(items = years) { year ->
+            MonthButton(
+                    selected = year == selectedYear,
+                    text = "$year"
+            ) {
+                onSelected(year)
+            }
+
+            Spacer(Modifier.width(12.dp))
+        }
+    }
+}
+
 
 data class MonthYear(
     val month: Month,
@@ -495,7 +570,7 @@ private fun Preview_MonthSelected() {
         ChoosePeriodModal(
             modal = ChoosePeriodModalData(
                 period = TimePeriod(
-                    month = fromMonthValue(3)
+                    month = fromMonthValue(2)
                 )
             ),
             dismiss = {}
@@ -504,6 +579,24 @@ private fun Preview_MonthSelected() {
         }
     }
 }
+
+@Preview
+@Composable
+private fun Preview_YearSelected() {
+    IvyWalletPreview {
+        ChoosePeriodModal(
+            modal = ChoosePeriodModalData(
+                period = TimePeriod(
+                    year = 2022
+                )
+            ),
+            dismiss = {}
+        ) {
+
+        }
+    }
+}
+
 
 @Preview
 @Composable

@@ -293,6 +293,7 @@
     <string name="edit_savings_goal">Edit Savings goal</string>
     <string name="choose_icon">Choose icon</string>
     <string name="choose_month">Choose month</string>
+    <string name="or_year">or year</string>
     <string name="or_custom_range">or custom range</string>
     <string name="add_date">Add date</string>
     <string name="or_in_the_last">or in the last</string>

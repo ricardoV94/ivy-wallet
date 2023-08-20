@@ -63,23 +63,27 @@ class BalanceViewModel @Inject constructor(
         start(period = period)
     }
 
-    fun nextMonth() {
+    fun nextPeriod() {
         val month = period.value.month
         val year = period.value.year ?: dateNowUTC().year
         if (month != null) {
             start(
                 period = month.incrementMonthPeriod(ivyContext, 1L, year = year),
             )
+        } else if (year != null) {
+            start( period = TimePeriod(year = year + 1))
         }
     }
 
-    fun previousMonth() {
+    fun previousPeriod() {
         val month = period.value.month
         val year = period.value.year ?: dateNowUTC().year
         if (month != null) {
             start(
                 period = month.incrementMonthPeriod(ivyContext, -1L, year = year),
             )
+        } else if (year != null) {
+            start( period = TimePeriod(year = year - 1))
         }
     }
 }

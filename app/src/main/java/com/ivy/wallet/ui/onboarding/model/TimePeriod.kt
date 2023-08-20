@@ -46,10 +46,16 @@ data class TimePeriod(
                 year = periodDate.year
             )
         }
+
+        fun currentYear(): TimePeriod {
+            return TimePeriod(year = dateNowUTC().year)
+        }
     }
 
+
+
     fun isValid(): Boolean =
-        month != null || fromToRange != null || lastNRange != null
+        month != null || year != null || fromToRange != null || lastNRange != null
 
     fun toRange(
         startDateOfMonth: Int
@@ -69,6 +75,12 @@ data class TimePeriod(
                 FromToTimeRange(
                     from = from,
                     to = to
+                )
+            }
+            year != null -> {
+                FromToTimeRange(
+                    from = LocalDateTime.of(year, 1, 1, 0, 0),
+                    to = LocalDateTime.of(year, 12, 31, 23, 59),
                 )
             }
             fromToRange != null -> {
@@ -124,6 +136,9 @@ data class TimePeriod(
                     "${range.from?.formatLocal(pattern)} - ${range.to?.formatLocal(pattern)}"
                 }
             }
+            year != null -> {
+                "$year"
+            }
             fromToRange != null -> {
                 fromToRange.toDisplay()
             }
@@ -144,6 +159,9 @@ data class TimePeriod(
                 } else {
                     toRange(startDateOfMonth).toDisplay()
                 }
+            }
+            year != null -> {
+                "$year"
             }
             fromToRange != null -> {
                 fromToRange.toDisplay()

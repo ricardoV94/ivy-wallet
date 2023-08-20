@@ -145,11 +145,11 @@ fun BoxWithConstraintsScope.ItemStatisticScreen(screen: ItemStatistic) {
                 period = it
             )
         },
-        onNextMonth = {
-            viewModel.nextMonth(screen)
+        onNextPeriod = {
+            viewModel.nextPeriod(screen)
         },
-        onPreviousMonth = {
-            viewModel.previousMonth(screen)
+        onPreviousPeriod = {
+            viewModel.previousPeriod(screen)
         },
         onDelete = {
             viewModel.delete(screen)
@@ -204,8 +204,8 @@ private fun BoxWithConstraintsScope.UI(
     overdueExpenses: Double = 0.0,
     overdue: List<Transaction> = emptyList(),
 
-    onPreviousMonth: () -> Unit,
-    onNextMonth: () -> Unit,
+    onPreviousPeriod: () -> Unit,
+    onNextPeriod: () -> Unit,
     onSetPeriod: (TimePeriod) -> Unit,
     onEditAccount: (Account, Double) -> Unit,
     onEditCategory: (Category) -> Unit,
@@ -234,10 +234,10 @@ private fun BoxWithConstraintsScope.UI(
                 horizontalSwipeListener(
                     sensitivity = 150,
                     onSwipeLeft = {
-                        onNextMonth()
+                        onNextPeriod()
                     },
                     onSwipeRight = {
-                        onPreviousMonth()
+                        onPreviousPeriod()
                     }
                 )
             }
@@ -338,8 +338,8 @@ private fun BoxWithConstraintsScope.UI(
                     PeriodSelector(
                         modifier = Modifier.padding(top = 16.dp),
                         period = period,
-                        onPreviousMonth = { if (!initWithTransactions) onPreviousMonth() },
-                        onNextMonth = { if (!initWithTransactions) onNextMonth() },
+                        onPreviousPeriod = { if (!initWithTransactions) onPreviousPeriod() },
+                        onNextPeriod = { if (!initWithTransactions) onNextPeriod() },
                         onShowChoosePeriodModal = {
                             if (!initWithTransactions)
                                 choosePeriodModal = ChoosePeriodModalData(
@@ -903,8 +903,8 @@ private fun Preview_empty() {
             category = null,
             account = Account("DSK", color = GreenDark.toArgb(), icon = "pet"),
             onSetPeriod = { },
-            onPreviousMonth = {},
-            onNextMonth = {},
+            onPreviousPeriod = {},
+            onNextPeriod = {},
             onDelete = {},
             onEditAccount = { _, _ -> },
             onEditCategory = {}
@@ -940,8 +940,8 @@ private fun Preview_crypto() {
                 includeInBalance = false
             ),
             onSetPeriod = { },
-            onPreviousMonth = {},
-            onNextMonth = {},
+            onPreviousPeriod = {},
+            onNextPeriod = {},
             onDelete = {},
             onEditAccount = { _, _ -> },
             onEditCategory = {}
@@ -972,8 +972,8 @@ private fun Preview_empty_upcoming() {
             category = null,
             account = Account("DSK", color = GreenDark.toArgb(), icon = "pet"),
             onSetPeriod = { },
-            onPreviousMonth = {},
-            onNextMonth = {},
+            onPreviousPeriod = {},
+            onNextPeriod = {},
             onDelete = {},
             onEditAccount = { _, _ -> },
             onEditCategory = {},

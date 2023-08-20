@@ -26,8 +26,8 @@ import com.ivy.wallet.ui.theme.components.IvyIcon
 fun PeriodSelector(
     modifier: Modifier = Modifier,
     period: TimePeriod,
-    onPreviousMonth: () -> Unit,
-    onNextMonth: () -> Unit,
+    onPreviousPeriod: () -> Unit,
+    onNextPeriod: () -> Unit,
     onShowChoosePeriodModal: () -> Unit,
 ) {
     Row(
@@ -39,13 +39,13 @@ fun PeriodSelector(
     ) {
         Spacer(Modifier.width(20.dp))
 
-        if (period.month != null) {
+        if ((period.month != null) or (period.year != null)){
             IvyIcon(
                 modifier = Modifier
                     .size(48.dp)
                     .clip(CircleShape)
                     .clickable {
-                        onPreviousMonth()
+                        onPreviousPeriod()
                     }
                     .padding(all = 8.dp)
                     .rotate(-180f),
@@ -84,13 +84,13 @@ fun PeriodSelector(
 
         Spacer(Modifier.weight(1f))
 
-        if (period.month != null) {
+        if ((period.month != null) or (period.year != null)){
             IvyIcon(
                 modifier = Modifier
                     .size(48.dp)
                     .clip(CircleShape)
                     .clickable {
-                        onNextMonth()
+                        onNextPeriod()
                     }
                     .padding(all = 8.dp),
                 icon = R.drawable.ic_arrow_right
@@ -109,8 +109,8 @@ private fun Preview() {
             period = TimePeriod.currentMonth(
                 startDayOfMonth = 1
             ), //preview
-            onPreviousMonth = { },
-            onNextMonth = { }
+            onPreviousPeriod = { },
+            onNextPeriod = { }
         ) {
 
         }

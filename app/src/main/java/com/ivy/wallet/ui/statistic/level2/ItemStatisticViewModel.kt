@@ -516,7 +516,7 @@ class ItemStatisticViewModel @Inject constructor(
         )
     }
 
-    fun nextMonth(screen: ItemStatistic) {
+    fun nextPeriod(screen: ItemStatistic) {
         val month = period.value.month
         val year = period.value.year ?: dateNowUTC().year
         if (month != null) {
@@ -525,16 +525,28 @@ class ItemStatisticViewModel @Inject constructor(
                 period = month.incrementMonthPeriod(ivyContext, 1L, year),
                 reset = false
             )
+        } else if (year != null) {
+            start(
+                screen = screen,
+                period = TimePeriod(year = year + 1),
+                reset = false
+            )
         }
     }
 
-    fun previousMonth(screen: ItemStatistic) {
+    fun previousPeriod(screen: ItemStatistic) {
         val month = period.value.month
         val year = period.value.year ?: dateNowUTC().year
         if (month != null) {
             start(
                 screen = screen,
                 period = month.incrementMonthPeriod(ivyContext, -1L, year),
+                reset = false
+            )
+        } else if (year != null) {
+            start(
+                screen = screen,
+                period = TimePeriod(year = year - 1),
                 reset = false
             )
         }
