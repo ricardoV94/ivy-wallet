@@ -62,6 +62,11 @@ android {
             resValue("string", "app_name", "Ivy Wallet")
         }
 
+        create("internalRelease") {
+            initWith(getByName("release"))
+            signingConfig = signingConfigs.getByName("debug")
+        }
+
         debug {
             isDebuggable = true
             isMinifyEnabled = false

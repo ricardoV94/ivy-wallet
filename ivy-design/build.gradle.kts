@@ -28,6 +28,10 @@ android {
                 "proguard-rules.pro"
             )
         }
+
+        create("internalRelease") {
+            initWith(getByName("release"))
+        }
     }
 
     compileOptions {

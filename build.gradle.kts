@@ -32,7 +32,7 @@ tasks.named<DependencyUpdatesTask>("dependencyUpdates").configure {
 // This has been tested thoroughly by community
 fun isNonStable(version: String): Boolean {
     val stableKeyword =
-        listOf("RELEASE", "FINAL", "GA", "RC").any { version.toUpperCase().contains(it) }
+        listOf("RELEASE", "FINAL", "GA", "RC", "INTERNALRELEASE").any { version.toUpperCase().contains(it) }
     val regex = "^[0-9,.v-]+(-r)?$".toRegex()
     val isStable = stableKeyword || regex.matches(version)
     return isStable.not()
