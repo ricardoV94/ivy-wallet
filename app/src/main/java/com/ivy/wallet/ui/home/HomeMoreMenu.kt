@@ -160,11 +160,11 @@ fun BoxWithConstraintsScope.MoreMenu(
         }
     }
 
-    if (percentExpanded > 0.01f) {
-        DonateButton(
-            percentExpanded = percentExpanded
-        )
-    }
+//    if (percentExpanded > 0.01f) {
+//        DonateButton(
+//            percentExpanded = percentExpanded
+//        )
+//    }
 
     CircleButtonFilled(
         modifier = Modifier
@@ -219,16 +219,16 @@ private fun ColumnScope.Content(
 
     Spacer(Modifier.height(40.dp))
 
-    Buffer(
-        buffer = buffer,
-        currency = currency,
-        balance = balance,
-        onBufferClick = onBufferClick
-    )
+//    Buffer(
+//        buffer = buffer,
+//        currency = currency,
+//        balance = balance,
+//        onBufferClick = onBufferClick
+//    )
 
     Spacer(Modifier.height(16.dp))
 
-    OpenSource()
+//    OpenSource()
 
     Spacer(Modifier.weight(1f))
 }
