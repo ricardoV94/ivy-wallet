@@ -7,7 +7,6 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -19,6 +18,7 @@ import com.ivy.design.l0_system.UI
 import com.ivy.design.l0_system.style
 import com.ivy.frp.view.navigation.navigation
 import com.ivy.wallet.R
+import com.ivy.wallet.domain.data.IntervalType
 import com.ivy.wallet.domain.data.core.Account
 import com.ivy.wallet.domain.data.core.Budget
 import com.ivy.wallet.domain.data.core.Category
@@ -40,8 +40,8 @@ import com.ivy.wallet.ui.theme.modal.ChoosePeriodModalData
 import com.ivy.wallet.ui.theme.wallet.AmountCurrencyB1
 import com.ivy.wallet.ui.theme.wallet.PeriodSelector
 import com.ivy.wallet.utils.clickableNoIndication
-import com.ivy.wallet.utils.format
 import com.ivy.wallet.utils.onScreenStart
+import java.time.Duration
 
 @Composable
 fun BoxWithConstraintsScope.BudgetScreen(screen: BudgetScreen) {
@@ -104,6 +104,24 @@ private fun BoxWithConstraintsScope.UI(
     var reorderModalVisible by remember { mutableStateOf(false) }
     var budgetModalData: BudgetModalData? by remember { mutableStateOf(null) }
 
+    val multiplier = when {
+        (period.month != null) -> 1.0 / 12
+        (period.year != null) -> 1.0
+        (period.lastNRange != null) -> when {
+            (period.lastNRange.periodType == IntervalType.DAY) -> period.lastNRange.periodN / 365.25
+            (period.lastNRange.periodType == IntervalType.WEEK) -> period.lastNRange.periodN / 52.0
+            (period.lastNRange.periodType == IntervalType.MONTH) -> period.lastNRange.periodN / 12.0
+            (period.lastNRange.periodType == IntervalType.YEAR) -> period.lastNRange.periodN * 1.0
+            else -> Double.NaN
+        }
+        ((period.fromToRange != null) and (period.fromToRange?.from != null) and (period.fromToRange?.to != null)) -> {
+            Duration.between(
+                period.fromToRange?.from,
+                period.fromToRange?.to
+            ).toDays() / 365.25
+        }
+        else -> Double.NaN
+    }
 
     Column(
         modifier = Modifier
@@ -143,7 +161,8 @@ private fun BoxWithConstraintsScope.UI(
 
             BudgetItem(
                 displayBudget = item,
-                baseCurrency = baseCurrency
+                baseCurrency = baseCurrency,
+                multiplier = multiplier
             ) {
                 budgetModalData = BudgetModalData(
                     budget = item.budget,
@@ -313,6 +332,7 @@ private fun Toolbar(
 private fun BudgetItem(
     displayBudget: DisplayBudget,
     baseCurrency: String,
+    multiplier: Double = 1.0,
 
     onClick: () -> Unit
 ) {
@@ -347,7 +367,6 @@ private fun BudgetItem(
             )
         }
 
-
         AmountCurrencyB1(
             amount = displayBudget.budget.amount,
             currency = baseCurrency,
@@ -363,7 +382,7 @@ private fun BudgetItem(
         modifier = Modifier.padding(horizontal = 16.dp),
         currency = baseCurrency,
         expenses = displayBudget.spentAmount,
-        budget = displayBudget.budget.amount,
+        budget = displayBudget.budget.amount * multiplier,
         backgroundNotFilled = UI.colors.medium
     ) {
         onClick()
@@ -433,52 +452,39 @@ private fun Preview_Empty() {
     }
 }
 
-@Preview
 @Composable
-private fun Preview_Budgets() {
+private fun preview_budgets(period: TimePeriod) {
     IvyWalletPreview {
         UI(
-            period = TimePeriod.currentMonth(startDayOfMonth = 1),
-            timeRange = TimePeriod.currentMonth(
-                startDayOfMonth = 1
-            ).toRange(1), //preview
+            period = period,
+            timeRange = period.toRange(1),
             baseCurrency = "BGN",
             categories = emptyList(),
             accounts = emptyList(),
             appBudgetMax = 5000.0,
             categoryBudgetsTotal = 0.0,
             displayBudgets = listOf(
-                DisplayBudget(
-                    budget = Budget(
-                        name = "Ivy Marketing",
-                        amount = 1000.0,
-                        accountIdsSerialized = null,
-                        categoryIdsSerialized = null,
-                        orderId = 0.0
-                    ),
-                    spentAmount = 260.0
-                ),
 
                 DisplayBudget(
                     budget = Budget(
                         name = "Ivy Marketing 2",
-                        amount = 1000.0,
+                        amount = 1200.0,
                         accountIdsSerialized = null,
                         categoryIdsSerialized = null,
                         orderId = 0.0
                     ),
-                    spentAmount = 351.0
+                    spentAmount = 90.0
                 ),
 
                 DisplayBudget(
                     budget = Budget(
                         name = "Baldr Products, Fidgets",
-                        amount = 750.0,
+                        amount = 120.0,
                         accountIdsSerialized = null,
                         categoryIdsSerialized = "cat1,cat2,cat3",
                         orderId = 0.1
                     ),
-                    spentAmount = 50.0
+                    spentAmount = 12.0
                 ),
             ),
 
@@ -486,3 +492,18 @@ private fun Preview_Budgets() {
         )
     }
 }
+
+@Preview
+@Composable
+private fun Preview_Budgets_Monthly_Period() {
+    preview_budgets(period = TimePeriod.currentMonth(startDayOfMonth = 1))
+}
+
+
+@Preview
+@Composable
+private fun Preview_Budgets_Yearly_Period() {
+    preview_budgets(period = TimePeriod.currentYear())
+}
+
+
