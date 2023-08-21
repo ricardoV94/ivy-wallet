@@ -106,7 +106,10 @@ class IvyWalletCtx : IvyContext() {
         initialDate: LocalDate?,
         onDatePicked: (LocalDate) -> Unit
     ) -> Unit
-    lateinit var onShowTimePicker: (onDatePicked: (LocalTime) -> Unit) -> Unit
+    lateinit var onShowTimePicker: (
+        initialTime: LocalTime?,
+        onDatePicked: (LocalTime) -> Unit
+    ) -> Unit
 
     fun datePicker(
         minDate: LocalDate? = null,
@@ -117,8 +120,11 @@ class IvyWalletCtx : IvyContext() {
         onShowDatePicker(minDate, maxDate, initialDate, onDatePicked)
     }
 
-    fun timePicker(onTimePicked: (LocalTime) -> Unit) {
-        onShowTimePicker(onTimePicked)
+    fun timePicker(
+        initialTime: LocalTime? = null,
+        onTimePicked: (LocalTime) -> Unit
+    ) {
+        onShowTimePicker(initialTime, onTimePicked)
     }
     //Activity help -------------------------------------------------------------------------------
 

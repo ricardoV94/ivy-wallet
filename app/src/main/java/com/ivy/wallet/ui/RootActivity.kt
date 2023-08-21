@@ -258,8 +258,8 @@ class RootActivity : AppCompatActivity() {
     }
 
     private fun setupTimePicker() {
-        ivyContext.onShowTimePicker = { onTimePicked ->
-            val nowLocal = timeNowLocal()
+        ivyContext.onShowTimePicker = { initialTime, onTimePicked ->
+            val nowLocal = if (initialTime != null) initialTime else timeNowLocal().toLocalTime()
             val picker = TimePickerDialog(
                 this,
                 { _, hourOfDay, minute ->

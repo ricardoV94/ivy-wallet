@@ -110,6 +110,14 @@ fun LocalDateTime.formatNicelyWithTime(
     }
 }
 
+fun LocalDateTime.formatNicelyTime(
+    zone: ZoneId = ZoneOffset.systemDefault()
+): String {
+    val pattern = "HH:mm"
+    return this.formatLocal(pattern, zone)
+
+}
+
 @Composable
 fun LocalDateTime.formatLocalTime(): String {
     val timeFormat = android.text.format.DateFormat.getTimeFormat(LocalContext.current)

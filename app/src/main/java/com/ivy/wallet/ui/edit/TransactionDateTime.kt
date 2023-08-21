@@ -18,7 +18,8 @@ import com.ivy.design.l0_system.style
 import com.ivy.wallet.R
 import com.ivy.wallet.ui.IvyWalletComponentPreview
 import com.ivy.wallet.ui.theme.components.IvyIcon
-import com.ivy.wallet.utils.formatNicelyWithTime
+import com.ivy.wallet.utils.formatNicely
+import com.ivy.wallet.utils.formatNicelyTime
 import com.ivy.wallet.utils.timeNowUTC
 import java.time.LocalDateTime
 
@@ -27,7 +28,8 @@ fun TransactionDateTime(
     dateTime: LocalDateTime?,
     dueDateTime: LocalDateTime?,
 
-    onEditDateTime: () -> Unit
+    onEditDate: () -> Unit,
+    onEditTime: () -> Unit
 ) {
     if (dueDateTime == null || dateTime != null) {
         Spacer(Modifier.height(12.dp))
@@ -38,10 +40,8 @@ fun TransactionDateTime(
                 .fillMaxWidth()
                 .clip(UI.shapes.r4)
                 .background(UI.colors.medium, UI.shapes.r4)
-                .clickable {
-                    onEditDateTime()
-                }
-                .padding(vertical = 12.dp),
+                .padding(vertical = 12.dp)
+                .clickable { onEditDate() },
             verticalAlignment = Alignment.CenterVertically
         ) {
             Spacer(Modifier.width(16.dp))
@@ -62,13 +62,22 @@ fun TransactionDateTime(
             Spacer(Modifier.weight(1f))
 
             Text(
-                text = (dateTime ?: timeNowUTC()).formatNicelyWithTime(
-                    noWeekDay = true
-                ),
+                text = (dateTime ?: timeNowUTC()).formatNicely(noWeekDay = true),
                 style = UI.typo.nB2.style(
                     color = UI.colors.pureInverse,
                     fontWeight = FontWeight.ExtraBold
-                )
+                ),
+            )
+
+            Spacer(Modifier.width(8.dp))
+
+            Text(
+                text = (dateTime ?: timeNowUTC()).formatNicelyTime(),
+                style = UI.typo.nB2.style(
+                    color = UI.colors.pureInverse,
+                    fontWeight = FontWeight.ExtraBold
+                ),
+                modifier = Modifier.clickable { onEditTime() }
             )
 
             Spacer(modifier = Modifier.width(24.dp))
@@ -82,9 +91,9 @@ private fun Preview() {
     IvyWalletComponentPreview {
         TransactionDateTime(
             dateTime = timeNowUTC(),
-            dueDateTime = null
-        ) {
-
-        }
+            dueDateTime = null,
+            onEditDate = {},
+            onEditTime = {}
+        )
     }
 }

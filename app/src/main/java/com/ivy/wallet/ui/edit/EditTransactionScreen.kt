@@ -38,11 +38,14 @@ import com.ivy.wallet.ui.theme.components.ChangeTransactionTypeModal
 import com.ivy.wallet.ui.theme.components.CustomExchangeRateCard
 import com.ivy.wallet.ui.theme.modal.*
 import com.ivy.wallet.ui.theme.modal.edit.*
+import com.ivy.wallet.utils.convertUTCToLocal
 import com.ivy.wallet.utils.convertUTCtoLocal
 import com.ivy.wallet.utils.getTrueDate
 import com.ivy.wallet.utils.onScreenStart
 import com.ivy.wallet.utils.timeNowLocal
+import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.LocalTime
 import java.util.*
 import kotlin.math.roundToInt
 
@@ -305,15 +308,35 @@ private fun BoxWithConstraintsScope.UI(
         TransactionDateTime(
             dateTime = dateTime,
             dueDateTime = dueDate,
-        ) {
-            ivyContext.datePicker(
-                initialDate = dateTime?.convertUTCtoLocal()?.toLocalDate(),
-            ) { date ->
-                ivyContext.timePicker { time ->
-                    onSetDateTime(getTrueDate(date, time))
+            onEditDate = {
+                ivyContext.datePicker(
+                    initialDate = dateTime?.convertUTCtoLocal()?.toLocalDate(),
+                ) { date ->
+                    val time = if (dateTime != null) dateTime.convertUTCtoLocal().toLocalTime() else LocalTime.now()
+                    onSetDateTime(
+                        getTrueDate(
+                            date = date,
+                            time = time,
+                            convert = false
+                        )
+                    )
+                }
+            },
+            onEditTime = {
+                ivyContext.timePicker(
+                    initialTime = dateTime?.convertUTCtoLocal()?.toLocalTime()
+                ) { time ->
+                    val date = if (dateTime != null) dateTime.convertUTCtoLocal().toLocalDate() else LocalDate.now()
+                    onSetDateTime(
+                        getTrueDate(
+                            date = date,
+                            time = time.convertUTCToLocal(),
+                            convert = false
+                        )
+                    )
                 }
             }
-        }
+        )
 
         if (transactionType == TransactionType.TRANSFER && customExchangeRateState.showCard) {
             Spacer(Modifier.height(12.dp))
